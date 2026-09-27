@@ -1,0 +1,63 @@
+def absorption(node,G,pom,strategy):
+    neis=list(G.neighbors(node))
+    neisfitness=[]
+    for nei in neis:
+        neisfitness.append(fitness(nei,G,pom,strategy))
+    sum_neis=sum(neisfitness)
+    neis_fitness_proba=np.array(neisfitness)/sum_neis
+    begin=0
+    end=neisfitness[0]
+    proba=random.uniform(0,1)
+    flag=0
+    for i in range(len(neis_fitness_proba)):
+        if (begin<=proba<=end):
+            selector=neis[i]
+            flag=1
+            break
+        else:
+            begin+=neis_fitness_proba[i]
+            if (i!=(len(neis_fitness_proba)-1)):
+                end+=neis_fitness_proba[i+1]
+    if flag==0:
+        selector=random.choice(neis)
+    stra=strategy[selector]
+    return stra
+def expansion(node,G,pom,strategy):
+    neis=list(G.neighbors(node))
+    neisfitness=[]
+    for nei in neis:
+        neisfitness.append(1/fitness(nei,G,pom,strategy))
+    sum_neis=sum(neisfitness)
+    neis_fitness_proba=np.array(neisfitness)/sum_neis
+    begin=0
+    end=neisfitness[0]
+    proba=random.uniform(0,1)
+    for i in range(len(neis_fitness_proba)):
+        if (begin<=proba<=end):
+            selector=neis[i]
+            break
+        else:
+            begin+=neis_fitness_proba[i]
+            if (i!=(len(neis_fitness_proba)-1)):
+                end+=neis_fitness_proba[i+1]
+    stra=strategy[selector]
+    return stra
+def imitation(node,G,pom,strategy):
+    neis=list(G.neighbors(node))
+    imitator=random.choice(neis)
+    proba=fitness(imitator,G,pom,strategy)/(fitness(imitator,G,pom,strategy)+fitness(i,G,pom,strategy))
+    if (random.random()<proba):
+        stra=strategy[imitator]
+    else:
+        stra=strategy[i]
+    return stra
+def pairwise_comparison(i,G,pom,strategy):
+    neis=list(G.neighbors(i))
+    j=random.choice(neis)
+    delta=0.01
+    proba=1/(1+delta*np.exp(payoff(i,G,pom,strategy)-payoff(j,G,pom,strategy)))
+    if (random.random()<proba):
+        stra=strategy[j]
+    else:
+        stra=strategy[i]
+    return stra
